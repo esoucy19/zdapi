@@ -4,6 +4,8 @@ This module queries Zoho Desk's API to obtain lists of clients, tickets, etc.
 import requests
 import os
 import itertools
+import json
+import datetime
 
 api_root = 'https://desk.zoho.com/api/v1/'
 token = os.environ.get('ZOHO_DESK_API_TOKEN')
@@ -49,5 +51,22 @@ def get_all_accounts():
     return accounts
 
 
-def cache_accounts():
-    pass
+# Accounts cache section; put in a separate file?
+cwd = os.getcwd()
+temp_dir = cwd + 'temp/'
+
+
+def cache_accounts(accounts):
+    file_path = temp_dir + 'accounts.json'
+    with open(file_path, 'w') as f:
+        json.dump(accounts, f)
+
+
+def cache_too_old():
+    file_path = temp_dir + 'accounts.json'
+    yesterday = datetime.date.today() - datetime.timedelta(1)
+    if os.path.isfile(file_path):
+        last_mod_date = datetime.fromtimestamp(os.path.getmtime(file_path))
+        if last_mod_date > yesterday:
+            return False
+    return True
