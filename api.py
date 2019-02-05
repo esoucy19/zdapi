@@ -51,22 +51,33 @@ def get_all_accounts():
     return accounts
 
 
+def cache_accounts():
+    data = get_all_accounts()
+    filename = 'accounts.json'
+    cache_data(data, filename)
+
+
 # Accounts cache section; put in a separate file?
 cwd = os.getcwd()
-temp_dir = cwd + 'temp/'
+temp_dir = cwd + '/temp/'
+if not os.path.exists(temp_dir):
+    os.makedirs(temp_dir)
 
 
-def cache_accounts(accounts):
-    file_path = temp_dir + 'accounts.json'
-    with open(file_path, 'w') as f:
-        json.dump(accounts, f)
+def cache_data(data, filename):
+    if not cache_is_fresh(filename):
+        file_path = temp_dir + filename
+        with open(file_path, 'w') as f:
+            json.dump(data, f)
 
 
-def cache_too_old():
-    file_path = temp_dir + 'accounts.json'
+def cache_is_fresh(filename):
+    file_path = temp_dir + filename
     yesterday = datetime.date.today() - datetime.timedelta(1)
     if os.path.isfile(file_path):
         last_mod_date = datetime.fromtimestamp(os.path.getmtime(file_path))
-        if last_mod_date > yesterday:
+        if last_mod_date < yesterday:
             return False
-    return True
+        return True
+    else:
+        return False
